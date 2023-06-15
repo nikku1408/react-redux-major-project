@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { loginUserAction } from "../../redux/slice/users/usersSlice";
 
 const Login = () => {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -16,8 +19,19 @@ const Login = () => {
   //---onsubmit handler----
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    console.log(formData);
+    dispatch(loginUserAction(formData));
+    setFormData({ email: "", password: "" });
   };
+
+  //get store data
+  const { loading, userAuth } = useSelector((state) => {
+    return state?.users;
+  });
+
+  //redirect
+  if (userAuth?.userInfo?.status) {
+    window.location.href = "/dashboard";
+  }
   return (
     <>
       <section className="relative py-16 bg-gray-50">
@@ -28,8 +42,13 @@ const Login = () => {
               <h4 className="max-w-xs font-heading text-3xl sm:text-4xl mt-2">
                 Login
               </h4>
+              {userAuth?.error?.message && (
+                <h2 className="text-red-500 text-center">
+                  {userAuth?.error?.message}
+                </h2>
+              )}
             </div>
-            <form action>
+            <form onSubmit={onSubmitHandler}>
               <div className="mb-4">
                 <label className="block text-sm leading-6 mb-2" htmlFor>
                   E-mail address
@@ -38,7 +57,7 @@ const Login = () => {
                   name="email"
                   value={email}
                   onChange={onChangeHandler}
-                  className="block w-full p-4 font-heading text-gray-300 placeholder-gray-300 bg-gray-50 rounded outline-none"
+                  className="block w-full p-4 font-heading text-gray-800 placeholder-gray-300 bg-gray-50 rounded outline-none"
                   type="email"
                   placeholder="Type e-mail"
                 />
@@ -51,18 +70,27 @@ const Login = () => {
                   name="password"
                   value={password}
                   onChange={onChangeHandler}
-                  className="block w-full p-4 font-heading text-gray-300 placeholder-gray-300 bg-gray-50 rounded outline-none"
+                  className="block w-full p-4 font-heading text-gray-800 placeholder-gray-300 bg-gray-50 rounded outline-none"
                   type="password"
                   placeholder="Type password"
                 />
               </div>
               <div className="text-right mb-6">
-                <button
-                  className="block w-full py-4 px-6 text-center font-heading font-medium text-base text-white bg-green-500 hover:bg-green-600 border border-green-500 hover:border-green-600 rounded-sm transition duration-200"
-                  type="submit"
-                >
-                  Sign in
-                </button>
+                {loading ? (
+                  <button
+                    className="block w-full py-4 px-6 text-center font-heading font-medium text-base text-white bg-violet-500 hover:bg-green-600 border border-green-500 hover:border-green-600 rounded-sm transition duration-200"
+                    type="submit"
+                  >
+                    Loading...
+                  </button>
+                ) : (
+                  <button
+                    className="block w-full py-4 px-6 text-center font-heading font-medium text-base text-white bg-green-500 hover:bg-green-600 border border-green-500 hover:border-green-600 rounded-sm transition duration-200"
+                    type="submit"
+                  >
+                    Sign in
+                  </button>
+                )}
               </div>
               <Link
                 className="block text-indigo-500 font-heading text-center hover:underline mb-6"
